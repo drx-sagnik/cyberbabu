@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberBabu — An Innovation by the owner of Cyber Gigs</title>
+    <link rel="icon" type="image/png" href="image.png">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- jsPDF Core Engine (2.5.1) -->
@@ -115,10 +116,10 @@
                         <!-- Exact CyberBabu Logo (Unclipped, Original Proportions) -->
                         <div class="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center">
                             <img 
-                                src="CyberBabu Tech Pharmacy Badge_2.png" 
+                                src="image.png" 
                                 alt="CyberBabu Logo" 
                                 class="cb-brand-logo w-full h-full object-contain drop-shadow-md"
-                                onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1';this.src='CyberBabu Tech Pharmacy Badge.png';}else{this.style.display='none';this.nextElementSibling.classList.remove('hidden');}"
+                                onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1';this.src='CyberBabu Tech Pharmacy Badge_2.png';}else{this.style.display='none';this.nextElementSibling.classList.remove('hidden');}"
                             >
                             <!-- Detailed Vector Replica Fallback (Only shown if local PNG path is blocked by sandbox) -->
                             <svg viewBox="0 0 500 500" class="cb-logo-fallback hidden w-full h-full drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
@@ -331,22 +332,9 @@
              ================================================================= -->
         <section id="view-pdf-tools" class="space-y-6">
 
-            <!-- Clean Title, Exact Unclipped Logo & Search Bar -->
+            <!-- Clean Title & Search Bar -->
             <div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
-                <div class="flex flex-col items-center text-center max-w-2xl mx-auto space-y-2">
-                    <label class="relative w-36 h-36 sm:w-44 sm:h-44 flex items-center justify-center cursor-pointer group" title="CyberBabu — Click if you want to pin/reload the PNG file directly">
-                        <input type="file" accept="image/*" class="hidden" onchange="handleBrandLogoFileSelect(event)">
-                        <img 
-                            src="CyberBabu Tech Pharmacy Badge_2.png" 
-                            alt="CyberBabu Tech Pharmacy Badge" 
-                            class="cb-brand-logo w-full h-full object-contain drop-shadow-lg"
-                            onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1';this.src='CyberBabu Tech Pharmacy Badge.png';}else{this.style.display='none';this.nextElementSibling.classList.remove('hidden');}"
-                        >
-                        <!-- Detailed Vector Replica Fallback -->
-                        <svg viewBox="0 0 500 500" class="cb-logo-fallback hidden w-full h-full drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
-                            <use href="#cbHeroSvgClone" />
-                        </svg>
-                    </label>
+                <div class="flex flex-col items-center text-center max-w-2xl mx-auto space-y-1.5">
                     <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
                         Free PDF &amp; Cyber Cafe Tools
                     </h1>
@@ -710,10 +698,10 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
             <div class="flex items-center gap-3">
                 <img 
-                    src="CyberBabu Tech Pharmacy Badge_2.png" 
+                    src="image.png" 
                     alt="CyberBabu" 
                     class="cb-brand-logo w-11 h-11 object-contain drop-shadow-xs"
-                    onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1';this.src='CyberBabu Tech Pharmacy Badge.png';}else{this.style.display='none';}"
+                    onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1';this.src='CyberBabu Tech Pharmacy Badge_2.png';}else{this.style.display='none';}"
                 >
                 <div>
                     <strong class="text-slate-800 dark:text-white">CyberBabu</strong> (Internet • Pharmacy • More) — An Innovation by the owner of <strong class="text-[#3b5998] dark:text-blue-400">Cyber Gigs</strong>
@@ -733,31 +721,6 @@
     <script>
         if (window['pdfjsLib']) {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        }
-
-        // Sync fallback SVG into hero if needed & restore exact saved PNG logo
-        function applyBrandLogoDataUrl(dataUrl) {
-            if (!dataUrl) return;
-            document.querySelectorAll('.cb-brand-logo').forEach(img => {
-                img.src = dataUrl;
-                img.style.display = '';
-            });
-            document.querySelectorAll('.cb-logo-fallback').forEach(svg => {
-                svg.classList.add('hidden');
-            });
-        }
-
-        function handleBrandLogoFileSelect(e) {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async ev => {
-                const dataUrl = ev.target.result;
-                await dbSaveItem('cb_exact_logo_png', dataUrl);
-                applyBrandLogoDataUrl(dataUrl);
-                showToast('Exact CyberBabu logo pinned & saved!');
-            };
-            reader.readAsDataURL(file);
         }
 
         // =================================================================
@@ -1833,18 +1796,6 @@
                 document.documentElement.classList.add('dark');
             }
             lucide.createIcons();
-
-            // Copy header fallback SVG inner markup to hero fallback SVG so both match identically if offline
-            const fallbackSvgs = document.querySelectorAll('.cb-logo-fallback');
-            if (fallbackSvgs.length > 1) {
-                fallbackSvgs[1].innerHTML = fallbackSvgs[0].innerHTML;
-            }
-
-            // Restore exact pinned PNG logo if previously selected
-            const savedLogo = await dbLoadItem('cb_exact_logo_png');
-            if (savedLogo) {
-                applyBrandLogoDataUrl(savedLogo);
-            }
 
             const savedQuery = localStorage.getItem('cb_search_query') || '';
             if (savedQuery) document.getElementById('toolSearchInput').value = savedQuery;
