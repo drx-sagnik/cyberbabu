@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberBabu — An Innovation by the owner of Cyber Gigs</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsPDF Core Engine (2.5.1) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- PDF.js (3.11.174) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff4ff',
+                            100: '#dbe6fe',
+                            500: '#3b5998',
+                            600: '#334e86',
+                            700: '#283e6b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Clean card hover matching reference screenshots */
+        .tool-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -6px rgba(59, 89, 152, 0.15);
+            border-color: #93c5fd;
+        }
+
+        /* Subtle checkerboard for transparent photo preview */
+        .checkerboard {
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+                linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+                linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+        }
+
+        /* Dedicated Print Media Query for Instant Print */
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #instantPrintArea, #instantPrintArea * {
+                visibility: visible !important;
+            }
+            #instantPrintArea {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                background: white !important;
+                display: flex !important;
+                align-items: flex-start !important;
+                justify-content: center !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                z-index: 99999 !important;
+            }
+            #instantPrintArea img {
+                max-width: 100% !important;
+                height: auto !important;
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- Hidden Instant Print Container -->
+    <div id="instantPrintArea" class="hidden"></div>
+
+    <!-- Clean Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4"></div>
+
+    <!-- =====================================================================
+         SIMPLE & CLEAN TOP NAVIGATION BAR
+         ===================================================================== -->
+    <header class="bg-[#3b5998] dark:bg-slate-950 text-white shadow-sm sticky top-0 z-40 border-b border-white/10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between py-2.5 gap-3">
+                
+                <!-- Brand Logo, Title & Tagline -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3.5 cursor-pointer group" onclick="switchTab('pdf-tools')">
+                        <!-- Exact CyberBabu Logo (Unclipped, Original Proportions) -->
+                        <div class="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center">
+                            <img 
+                                src="CyberBabu Tech Pharmacy Badge_2.png" 
+                                alt="CyberBabu Logo" 
+                                class="cb-brand-logo w-full h-full object-contain drop-shadow-md"
+                                onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1';this.src='CyberBabu Tech Pharmacy Badge.png';}else{this.style.display='none';this.nextElementSibling.classList.remove('hidden');}"
+                            >
+                            <!-- Detailed Vector Replica Fallback (Only shown if local PNG path is blocked by sandbox) -->
+                            <svg viewBox="0 0 500 500" class="cb-logo-fallback hidden w-full h-full drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="cbOuterGlow" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#00f2fe"/>
+                                        <stop offset="50%" stop-color="#0284c7"/>
+                                        <stop offset="100%" stop-color="#00f2fe"/>
+                                    </linearGradient>
+                                    <linearGradient id="cbNavyBg" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#041e42"/>
+                                        <stop offset="100%" stop-color="#020b18"/>
+                                    </linearGradient>
+                                    <linearGradient id="cbWhiteGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#ffffff"/>
+                                        <stop offset="65%" stop-color="#f1f5f9"/>
+                                        <stop offset="100%" stop-color="#94a3b8"/>
+                                    </linearGradient>
+                                    <linearGradient id="cbCyanGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#67e8f9"/>
+                                        <stop offset="50%" stop-color="#00e5ff"/>
+                                        <stop offset="100%" stop-color="#0284c7"/>
+                                    </linearGradient>
+                                    <linearGradient id="cbSkin" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#ffdbb5"/>
+                                        <stop offset="60%" stop-color="#f1b88a"/>
+                                        <stop offset="100%" stop-color="#c68652"/>
+                                    </linearGradient>
+                                    <linearGradient id="cbScreen" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#0284c7"/>
+                                        <stop offset="100%" stop-color="#0f172a"/>
+                                    </linearGradient>
+                                </defs>
+                                <!-- Outer Neon Circle -->
+                                <circle cx="255" cy="270" r="198" fill="url(#cbNavyBg)" stroke="#00e5ff" stroke-width="10"/>
+                                <circle cx="255" cy="270" r="186" fill="none" stroke="#0284c7" stroke-width="4"/>
+                                <!-- Circuit Traces -->
+                                <g stroke="#0ea5e9" stroke-width="2.5" opacity="0.45" fill="none">
+                                    <path d="M95 190 h35 l20 -20 v-30"/>
+                                    <path d="M120 140 l25 -25 h40"/>
+                                    <path d="M370 125 l25 25 v35"/>
+                                    <circle cx="150" cy="140" r="4" fill="#00e5ff"/>
+                                    <circle cx="185" cy="115" r="4" fill="#00e5ff"/>
+                                    <circle cx="395" cy="185" r="4" fill="#00e5ff"/>
+                                </g>
+                                <!-- Wi-Fi Icon Left -->
+                                <g transform="translate(135, 165) rotate(-25)" stroke="#67e8f9" stroke-width="7" stroke-linecap="round" fill="none">
+                                    <path d="M-32 -10 A45 45 0 0 1 32 -10"/>
+                                    <path d="M-22 4 A30 30 0 0 1 22 4"/>
+                                    <path d="M-11 17 A15 15 0 0 1 11 17"/>
+                                    <circle cx="0" cy="29" r="5" fill="#67e8f9" stroke="none"/>
+                                </g>
+                                <!-- Laptop Left (Protruding Die-Cut) -->
+                                <g>
+                                    <polygon points="28,185 135,198 152,276 52,272" fill="#0f172a" stroke="#00e5ff" stroke-width="5" stroke-linejoin="round"/>
+                                    <polygon points="35,193 130,204 145,268 57,265" fill="url(#cbScreen)"/>
+                                    <!-- Globe on Laptop -->
+                                    <ellipse cx="90" cy="232" rx="22" ry="22" fill="none" stroke="#38bdf8" stroke-width="2.2"/>
+                                    <ellipse cx="90" cy="232" rx="11" ry="22" fill="none" stroke="#38bdf8" stroke-width="1.8"/>
+                                    <line x1="68" y1="232" x2="112" y2="232" stroke="#38bdf8" stroke-width="1.8"/>
+                                    <line x1="72" y1="222" x2="108" y2="222" stroke="#38bdf8" stroke-width="1.5"/>
+                                    <line x1="72" y1="242" x2="108" y2="242" stroke="#38bdf8" stroke-width="1.5"/>
+                                    <!-- Laptop Base -->
+                                    <polygon points="52,272 152,276 185,292 32,288" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
+                                </g>
+                                <!-- Green Pharmacy Cross Right -->
+                                <g transform="translate(362, 165)">
+                                    <circle cx="0" cy="0" r="46" fill="#ffffff" stroke="#15803d" stroke-width="7"/>
+                                    <circle cx="0" cy="0" r="39" fill="#ffffff" stroke="#dcfce7" stroke-width="2"/>
+                                    <path d="M-11 -27 h22 v16 h16 v22 h-16 v16 h-22 v-16 h-16 v-22 h16 z" fill="#16a34a"/>
+                                </g>
+                                <!-- Mortar & Pestle + Pills Right -->
+                                <g transform="translate(392, 236)">
+                                    <!-- Pestle -->
+                                    <path d="M5 -12 L25 -42 A10 10 0 0 1 42 -30 L18 0 Z" fill="#f8fafc" stroke="#94a3b8" stroke-width="2.5"/>
+                                    <!-- Mortar -->
+                                    <ellipse cx="0" cy="0" rx="38" ry="10" fill="#cbd5e1" stroke="#f8fafc" stroke-width="3"/>
+                                    <path d="M-36 2 C-34 38, 34 38, 36 2 Z" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2"/>
+                                    <rect x="-22" y="30" width="44" height="8" rx="3" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+                                    <!-- Green Hygieia Icon on Mortar -->
+                                    <path d="M-9 11 h18 c0 6 -6 9 -9 9 c-3 0 -9 -3 -9 -9 z M0 20 v8 M-6 28 h12" stroke="#15803d" stroke-width="2.2" fill="#16a34a"/>
+                                    <!-- Green Leaves -->
+                                    <path d="M28 24 C45 14, 56 26, 34 36 Z" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
+                                    <!-- Pill Bottle -->
+                                    <rect x="20" y="38" width="28" height="38" rx="5" fill="#f8fafc" stroke="#475569" stroke-width="2.5"/>
+                                    <rect x="20" y="50" width="28" height="14" fill="#0284c7"/>
+                                    <rect x="23" y="30" width="22" height="8" rx="2" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+                                    <!-- Blister Pack -->
+                                    <g transform="translate(56, 48) rotate(18)">
+                                        <rect x="0" y="0" width="26" height="34" rx="4" fill="#94a3b8" stroke="#334155" stroke-width="2"/>
+                                        <circle cx="8" cy="9" r="3.5" fill="#f8fafc"/>
+                                        <circle cx="18" cy="9" r="3.5" fill="#f8fafc"/>
+                                        <circle cx="8" cy="23" r="3.5" fill="#f8fafc"/>
+                                        <circle cx="18" cy="23" r="3.5" fill="#f8fafc"/>
+                                    </g>
+                                    <!-- Capsules -->
+                                    <rect x="34" y="76" width="16" height="8" rx="4" transform="rotate(-25 34 76)" fill="#eab308" stroke="#1e293b" stroke-width="1.5"/>
+                                    <rect x="48" y="78" width="16" height="8" rx="4" transform="rotate(-15 48 78)" fill="#0284c7" stroke="#1e293b" stroke-width="1.5"/>
+                                </g>
+                                <!-- Center Young Man Mascot (Popping out top of circle) -->
+                                <g>
+                                    <!-- Neck & Head -->
+                                    <path d="M225 145 L222 195 L278 200 L272 150 Z" fill="url(#cbSkin)"/>
+                                    <!-- Jaw/Face -->
+                                    <path d="M212 95 C208 135, 224 162, 256 162 C284 162, 296 136, 292 98 Z" fill="url(#cbSkin)" stroke="#1e293b" stroke-width="2.5"/>
+                                    <!-- Ear -->
+                                    <ellipse cx="208" cy="128" rx="8" ry="14" fill="url(#cbSkin)" stroke="#1e293b" stroke-width="2"/>
+                                    <!-- Mustache & Goatee -->
+                                    <path d="M245 132 Q262 126 277 134" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                                    <path d="M250 137 Q262 142 273 137" stroke="#b91c1c" stroke-width="2.5" fill="none"/>
+                                    <path d="M242 156 Q260 165 276 155" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                                    <!-- Black Sunglasses -->
+                                    <g transform="rotate(7 255 110)">
+                                        <rect x="220" y="96" width="34" height="22" rx="4" fill="#090d16" stroke="#e2e8f0" stroke-width="2"/>
+                                        <rect x="262" y="96" width="34" height="22" rx="4" fill="#090d16" stroke="#e2e8f0" stroke-width="2"/>
+                                        <line x1="254" y1="103" x2="262" y2="103" stroke="#e2e8f0" stroke-width="3"/>
+                                        <line x1="206" y1="106" x2="220" y2="103" stroke="#090d16" stroke-width="4"/>
+                                    </g>
+                                    <!-- Voluminous Curly Hair (Extending above circle) -->
+                                    <path d="M196 112 C180 88, 190 52, 215 44 C222 25, 255 20, 274 34 C298 28, 322 48, 315 74 C328 88, 318 115, 298 112 C292 86, 265 78, 235 84 C215 88, 205 100, 196 112 Z" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5"/>
+                                    <path d="M215 58 Q232 45 245 62 M255 46 Q275 38 282 58 M228 74 Q250 62 268 76" stroke="#334155" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                    <!-- Black Hoodie & Crossed Arms -->
+                                    <path d="M158 310 C158 232, 185 198, 215 190 L285 195 C325 206, 355 245, 362 312 Z" fill="#111827" stroke="#00e5ff" stroke-width="3.5"/>
+                                    <!-- Hood Collar -->
+                                    <path d="M185 192 C195 215, 285 218, 305 194" fill="#1e293b" stroke="#334155" stroke-width="3"/>
+                                    <!-- Cyan Hoodie Strings -->
+                                    <path d="M240 212 C245 245, 250 275, 252 300" stroke="#00e5ff" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+                                    <path d="M292 212 C296 238, 298 262, 298 282" stroke="#00e5ff" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+                                    <!-- White Caduceus on Chest -->
+                                    <g transform="translate(292, 245) scale(0.8)">
+                                        <line x1="0" y1="-18" x2="0" y2="24" stroke="#ffffff" stroke-width="3"/>
+                                        <circle cx="0" cy="-20" r="3.5" fill="#ffffff"/>
+                                        <path d="M-22 -12 Q-8 -20 0 -8 Q8 -20 22 -12 Q12 -4 0 -4 Q-12 -4 -22 -12 Z" fill="#ffffff"/>
+                                        <path d="M-8 0 Q8 6 -8 14 Q8 20 -6 24" stroke="#ffffff" stroke-width="2.5" fill="none"/>
+                                        <path d="M8 0 Q-8 6 8 14 Q-8 20 6 24" stroke="#ffffff" stroke-width="2.5" fill="none"/>
+                                    </g>
+                                    <!-- Crossed Arms & Watch -->
+                                    <path d="M175 288 C215 272, 295 275, 345 302" stroke="#1f2937" stroke-width="26" stroke-linecap="round" fill="none"/>
+                                    <circle cx="272" cy="292" r="14" fill="#090d16" stroke="#94a3b8" stroke-width="2.5"/>
+                                    <line x1="272" y1="292" x2="278" y2="286" stroke="#e2e8f0" stroke-width="2"/>
+                                </g>
+                                <!-- Bottom Banner Base -->
+                                <path d="M18 308 L482 315 L462 392 L35 392 Z" fill="#050811" stroke="#00e5ff" stroke-width="6" stroke-linejoin="round"/>
+                                <!-- "CyberBabu" 3D Text -->
+                                <text x="42" y="375" font-family="Inter, Arial Black, sans-serif" font-weight="900" font-style="italic" font-size="72" fill="url(#cbWhiteGrad)" stroke="#020617" stroke-width="3" letter-spacing="-2">Cyber</text>
+                                <text x="268" y="375" font-family="Inter, Arial Black, sans-serif" font-weight="900" font-style="italic" font-size="72" fill="url(#cbCyanGrad)" stroke="#020617" stroke-width="3" letter-spacing="-2">Babu</text>
+                                <!-- Sub-Banner: INTERNET • PHARMACY • MORE + Mouse -->
+                                <path d="M105 392 Q255 380 405 392 L385 426 Q255 415 125 426 Z" fill="#050811" stroke="#00e5ff" stroke-width="3"/>
+                                <text x="252" y="413" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="15" fill="#ffffff" letter-spacing="1.5">
+                                    INTERNET <tspan fill="#00e5ff">•</tspan> PHARMACY <tspan fill="#00e5ff">•</tspan> MORE
+                                </text>
+                                <!-- White Computer Mouse Right -->
+                                <ellipse cx="395" cy="405" rx="16" ry="11" transform="rotate(-30 395 405)" fill="#f8fafc" stroke="#00e5ff" stroke-width="3"/>
+                                <!-- Bottom Bowl of Hygieia & Green Leaves -->
+                                <path d="M115 430 Q255 420 395 430 A190 190 0 0 1 115 430 Z" fill="#050811"/>
+                                <g transform="translate(255, 448)">
+                                    <path d="M-16 -8 h32 c0 10 -10 14 -16 14 c-6 0 -16 -4 -16 -14 z M0 6 v12 M-10 18 h20" fill="#ffffff" stroke="#ffffff" stroke-width="2"/>
+                                    <path d="M-24 2 C-38 -6, -44 6, -26 12 Z" fill="#22c55e"/>
+                                    <path d="M24 2 C38 -6, 44 6, 26 12 Z" fill="#22c55e"/>
+                                    <line x1="-85" y1="4" x2="-45" y2="4" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                                    <line x1="45" y1="4" x2="85" y2="4" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+                                </g>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-lg sm:text-xl tracking-tight text-white">Cyber<span class="text-cyan-300">Babu</span></span>
+                                <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 px-2 py-0.5 rounded-full">
+                                    Internet • Pharmacy • More
+                                </span>
+                            </div>
+                            <p class="text-xs text-blue-100">An Innovation by the owner of <strong class="text-white">Cyber Gigs</strong></p>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Theme Toggle -->
+                    <button onclick="toggleTheme()" class="md:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white" title="Toggle Light/Dark Mode">
+                        <i data-lucide="moon" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Simple 2-Tab Switcher -->
+                <nav class="flex items-center gap-1.5 overflow-x-auto py-1 md:py-0">
+                    <button id="tabBtn-pdf-tools" onclick="switchTab('pdf-tools')" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap bg-white text-[#3b5998] shadow-sm">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                        <span>PDF Tools</span>
+                    </button>
+                    <button id="tabBtn-passport" onclick="switchTab('passport')" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap text-white/90 hover:bg-white/15">
+                        <i data-lucide="camera" class="w-4 h-4"></i>
+                        <span>Passport Photo Maker</span>
+                    </button>
+
+                    <!-- Desktop Theme Toggle -->
+                    <button onclick="toggleTheme()" class="hidden md:flex ml-2 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white items-center justify-center" title="Toggle Light/Dark Mode">
+                        <i data-lucide="sun-moon" class="w-4 h-4"></i>
+                    </button>
+                </nav>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- =====================================================================
+         MAIN WORKSPACE CONTAINER
+         ===================================================================== -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
+
+        <!-- =================================================================
+             TAB 1: CLEAN PDF TOOLS DIRECTORY
+             ================================================================= -->
+        <section id="view-pdf-tools" class="space-y-6">
+
+            <!-- Clean Title, Exact Unclipped Logo & Search Bar -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
+                <div class="flex flex-col items-center text-center max-w-2xl mx-auto space-y-2">
+                    <label class="relative w-36 h-36 sm:w-44 sm:h-44 flex items-center justify-center cursor-pointer group" title="CyberBabu — Click if you want to pin/reload the PNG file directly">
+                        <input type="file" accept="image/*" class="hidden" onchange="handleBrandLogoFileSelect(event)">
+                        <img 
+                            src="CyberBabu Tech Pharmacy Badge_2.png" 
+                            alt="CyberBabu Tech Pharmacy Badge" 
+                            class="cb-brand-logo w-full h-full object-contain drop-shadow-lg"
+                            onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1';this.src='CyberBabu Tech Pharmacy Badge.png';}else{this.style.display='none';this.nextElementSibling.classList.remove('hidden');}"
+                        >
+                        <!-- Detailed Vector Replica Fallback -->
+                        <svg viewBox="0 0 500 500" class="cb-logo-fallback hidden w-full h-full drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+                            <use href="#cbHeroSvgClone" />
+                        </svg>
+                    </label>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                        Free PDF &amp; Cyber Cafe Tools
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                        Compress, convert, merge, crop shipping labels, and edit documents privately in your browser.
+                    </p>
+                </div>
+
+                <!-- Search Input -->
+                <div class="relative max-w-xl mx-auto">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input 
+                        type="text" 
+                        id="toolSearchInput" 
+                        oninput="filterTools()"
+                        placeholder="Search Tool (e.g., 100KB, Meesho, Merge, Word, Split)..." 
+                        class="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#3b5998] focus:bg-white dark:focus:bg-slate-900 transition"
+                    >
+                    <button id="clearSearchBtn" onclick="clearToolSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Simple Category Filter Pills -->
+                <div id="categoryFilterPills" class="flex items-center gap-2 overflow-x-auto pt-1 pb-1">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Most Used Tools Quick Grid -->
+            <div id="mostUsedBox" class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3.5">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2.5">
+                    <h2 class="text-sm sm:text-base font-bold text-slate-800 dark:text-white">Most Used Tools</h2>
+                    <div class="flex gap-3">
+                        <button onclick="switchTab('passport')" class="text-xs font-semibold text-[#3b5998] dark:text-blue-400 hover:underline">
+                            Passport Photo Maker &rarr;
+                        </button>
+                    </div>
+                </div>
+                <div id="mostUsedGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Categorized Tool Cards Container -->
+            <div id="toolsDirectoryContainer" class="space-y-7">
+                <!-- Populated via JS -->
+            </div>
+
+        </section>
+
+        <!-- =================================================================
+             TAB 2: SIMPLE INDIAN PASSPORT SIZE PHOTO MAKER (INSTANT PRINT)
+             ================================================================= -->
+        <section id="view-passport" class="hidden space-y-5">
+
+            <!-- Clean Top Bar -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">
+                            Indian Passport Size Photo Maker
+                        </h2>
+                        <span class="text-[11px] bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded font-medium">Auto-Saved</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Upload a photo, remove or change background color, select quantity, and print immediately.
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <label class="px-4 py-2 rounded-lg bg-[#3b5998] hover:bg-[#334e86] text-white text-xs sm:text-sm font-semibold cursor-pointer inline-flex items-center gap-2 shadow-sm transition">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        <span>Upload Photo</span>
+                        <input type="file" id="ppFileInput" accept="image/*" class="hidden" onchange="handlePassportUpload(event)">
+                    </label>
+                    <button onclick="resetPassportTask()" class="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium inline-flex items-center gap-1.5 transition" title="Reset to Default">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        <span>New Photo</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Simple 2-Column Workspace -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+                <!-- LEFT COLUMN: Clean Controls (5 Cols) -->
+                <div class="lg:col-span-5 space-y-4">
+
+                    <!-- STEP 1: Crop & Rotate -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3.5">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+                            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-white">1. Crop &amp; Rotate</h3>
+                            <button onclick="resetPassportCrop()" class="text-xs text-[#3b5998] dark:text-blue-400 hover:underline font-medium">Reset Position</button>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="rotatePassport(-90)" class="py-1.5 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium flex items-center justify-center gap-1">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Left
+                            </button>
+                            <button onclick="rotatePassport(90)" class="py-1.5 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium flex items-center justify-center gap-1">
+                                <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Right
+                            </button>
+                            <button onclick="flipPassportH()" class="py-1.5 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-medium flex items-center justify-center gap-1">
+                                <i data-lucide="flip-horizontal" class="w-3.5 h-3.5"></i> Flip
+                            </button>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <div>
+                                <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                                    <span>Zoom</span>
+                                    <span id="ppZoomLabel" class="font-semibold">100%</span>
+                                </div>
+                                <input type="range" id="ppZoom" min="60" max="220" value="100" oninput="renderPassportAll()" class="w-full accent-[#3b5998]">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <div class="text-xs text-slate-600 dark:text-slate-400 mb-1">Horizontal</div>
+                                    <input type="range" id="ppPanX" min="-120" max="120" value="0" oninput="renderPassportAll()" class="w-full accent-[#3b5998]">
+                                </div>
+                                <div>
+                                    <div class="text-xs text-slate-600 dark:text-slate-400 mb-1">Vertical</div>
+                                    <input type="range" id="ppPanY" min="-120" max="120" value="0" oninput="renderPassportAll()" class="w-full accent-[#3b5998]">
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                                    <span>Straighten</span>
+                                    <span id="ppTiltLabel" class="font-semibold">0°</span>
+                                </div>
+                                <input type="range" id="ppTilt" min="-20" max="20" value="0" oninput="renderPassportAll()" class="w-full accent-[#3b5998]">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Background Remover & Color Changer -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3.5">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+                            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-white">2. Background Color</h3>
+                            <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                                <input type="checkbox" id="ppRemoveBg" checked onchange="renderPassportAll()" class="w-4 h-4 accent-[#3b5998] rounded">
+                                <span class="text-xs font-semibold text-[#3b5998] dark:text-blue-400">Remove Background</span>
+                            </label>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="setPassportBg('#FFFFFF')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-xs font-semibold shadow-2xs hover:border-[#3b5998]">
+                                White
+                            </button>
+                            <button onclick="setPassportBg('#0047AB')" class="px-3 py-1.5 rounded-lg border border-blue-800 bg-[#0047AB] text-white text-xs font-semibold shadow-2xs">
+                                Blue
+                            </button>
+                            <button onclick="setPassportBg('#38BDF8')" class="px-3 py-1.5 rounded-lg border border-sky-400 bg-[#38BDF8] text-slate-950 text-xs font-semibold shadow-2xs">
+                                Sky Blue
+                            </button>
+                            <button onclick="setPassportBg('#E2E8F0')" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-[#E2E8F0] text-slate-800 text-xs font-semibold shadow-2xs">
+                                Grey
+                            </button>
+                            <button onclick="setPassportBg('#DC2626')" class="px-3 py-1.5 rounded-lg border border-red-700 bg-[#DC2626] text-white text-xs font-semibold shadow-2xs">
+                                Red
+                            </button>
+                            <label class="px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-600 text-xs font-medium cursor-pointer inline-flex items-center gap-1">
+                                <input type="color" id="ppCustomColorPicker" value="#0047AB" oninput="setPassportBg(this.value)" class="w-4 h-4 border-0 bg-transparent cursor-pointer">
+                                <span>Custom</span>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 pt-1">
+                            <div>
+                                <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                                    <span>BG Erase Level</span>
+                                    <span id="ppSensLabel" class="font-semibold">38</span>
+                                </div>
+                                <input type="range" id="ppSensitivity" min="5" max="90" value="38" oninput="renderPassportAll()" class="w-full accent-[#3b5998]">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                                    <span>Brightness</span>
+                                    <span id="ppBrightLabel" class="font-semibold">105%</span>
+                                </div>
+                                <input type="range" id="ppBrightness" min="75" max="140" value="105" oninput="renderPassportAll()" class="w-full accent-[#3b5998]">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Quantity & Print Setup -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3.5">
+                        <div class="border-b border-slate-100 dark:border-slate-700 pb-2">
+                            <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-white">3. Size &amp; Quantity</h3>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Photo Size</label>
+                                <select id="ppSizeSelect" onchange="changePassportDimensions()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs">
+                                    <option value="35x45" selected>Passport (35 × 45 mm)</option>
+                                    <option value="25x35">PAN / Stamp (25 × 35 mm)</option>
+                                    <option value="50x50">Visa Square (50 × 50 mm)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Paper Size</label>
+                                <select id="ppSheetSelect" onchange="renderPassportSheet(); savePassportStateToStorage();" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs">
+                                    <option value="A4" selected>A4 Sheet</option>
+                                    <option value="4x6">4 × 6 Photo Paper</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1.5">Number of Copies:</label>
+                            <div class="grid grid-cols-5 gap-1.5">
+                                <button onclick="setPassportCopyCount(4)" class="py-1.5 rounded border border-slate-200 dark:border-slate-700 hover:border-[#3b5998] text-xs font-semibold">4</button>
+                                <button onclick="setPassportCopyCount(6)" class="py-1.5 rounded border border-slate-200 dark:border-slate-700 hover:border-[#3b5998] text-xs font-semibold">6</button>
+                                <button onclick="setPassportCopyCount(8)" class="py-1.5 rounded border border-slate-200 dark:border-slate-700 hover:border-[#3b5998] text-xs font-semibold">8</button>
+                                <button onclick="setPassportCopyCount(12)" class="py-1.5 rounded border border-slate-200 dark:border-slate-700 hover:border-[#3b5998] text-xs font-semibold">12</button>
+                                <button onclick="setPassportCopyCount(16)" class="py-1.5 rounded border border-slate-200 dark:border-slate-700 hover:border-[#3b5998] text-xs font-semibold">16</button>
+                                <button onclick="setPassportCopyCount(24)" class="py-1.5 rounded border border-slate-200 dark:border-slate-700 hover:border-[#3b5998] text-xs font-semibold">24</button>
+                                <button onclick="setPassportCopyCount(30)" class="py-1.5 rounded border border-slate-200 dark:border-slate-700 hover:border-[#3b5998] text-xs font-semibold">30</button>
+                                <button onclick="setPassportCopyCount(36)" class="py-1.5 rounded border border-slate-200 dark:border-slate-700 hover:border-[#3b5998] text-xs font-semibold">36</button>
+                                <input type="number" id="ppQtyInput" value="8" min="1" max="60" oninput="setPassportCopyCount(this.value)" class="col-span-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded px-2 py-1 text-center text-xs font-bold" title="Custom Quantity">
+                            </div>
+                        </div>
+
+                        <div class="pt-1 space-y-2 border-t border-slate-100 dark:border-slate-700">
+                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="ppShowNameDate" onchange="renderPassportAll()" class="w-4 h-4 accent-[#3b5998] rounded">
+                                <span class="text-xs font-medium text-slate-700 dark:text-slate-300">Add Name &amp; Date on Photo</span>
+                            </label>
+                            <div id="ppNameDateFields" class="hidden grid grid-cols-2 gap-2">
+                                <input type="text" id="ppNameText" value="AARAV SHARMA" oninput="renderPassportAll()" placeholder="Name" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-2.5 py-1.5 text-xs">
+                                <input type="text" id="ppDateText" value="13/11/2026" oninput="renderPassportAll()" placeholder="Date" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-2.5 py-1.5 text-xs">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: Single Photo & Full Print Sheet Preview (7 Cols) -->
+                <div class="lg:col-span-7 space-y-4">
+
+                    <!-- Action Bar + Single Photo Preview -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="p-1.5 rounded-lg checkerboard border border-slate-300 dark:border-slate-600 shrink-0">
+                                <canvas id="singlePhotoCanvas" width="350" height="450" class="w-20 sm:w-24 h-auto rounded cursor-crosshair shadow-xs" title="Click background on photo to remove that color"></canvas>
+                            </div>
+                            <div class="space-y-1">
+                                <h4 class="text-sm font-bold text-slate-800 dark:text-white">Single Photo Preview</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    Tip: Click the background area inside this small photo to erase any wall color.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex sm:flex-col gap-2 w-full sm:w-auto shrink-0">
+                            <button onclick="instantPrintPassport()" class="flex-1 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
+                                <i data-lucide="printer" class="w-4 h-4"></i>
+                                <span>Print Now</span>
+                            </button>
+                            <button onclick="downloadPassportJsPDF()" class="flex-1 px-5 py-2.5 rounded-lg bg-[#3b5998] hover:bg-[#334e86] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                <span>Download PDF</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Print Sheet Preview Box -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-white">Print Sheet Preview</span>
+                            <span id="ppSheetSummary" class="text-xs font-medium text-slate-500 dark:text-slate-400">A4 Sheet • 8 Copies</span>
+                        </div>
+                        <div class="bg-slate-100 dark:bg-slate-900 rounded-lg p-3 flex items-center justify-center overflow-auto max-h-[500px] border border-slate-200 dark:border-slate-700">
+                            <canvas id="sheetPreviewCanvas" class="bg-white shadow rounded max-w-full h-auto" style="max-height: 450px;"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =====================================================================
+         SIMPLE & FOCUSED MODAL WORKBENCH FOR ANY SELECTED PDF TOOL
+         ===================================================================== -->
+    <div id="toolModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-4xl rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col max-h-[90vh]">
+
+            <!-- Modal Header -->
+            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <div>
+                    <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Compress PDF to 100KB</h3>
+                    <p id="modalSubtitle" class="text-xs text-slate-500 dark:text-slate-400">Reduce a PDF to 100KB for job forms and admissions.</p>
+                </div>
+                <button onclick="closeModal()" class="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+
+                <!-- Left Controls (5 Cols) -->
+                <div class="md:col-span-5 space-y-4">
+
+                    <!-- File Upload Box -->
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-600 text-center space-y-2.5">
+                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">Select PDF or Image File</p>
+                        <div class="flex flex-wrap items-center justify-center gap-2">
+                            <label class="px-3.5 py-2 rounded-lg bg-[#3b5998] hover:bg-[#334e86] text-white text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5">
+                                <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
+                                <span>Choose File</span>
+                                <input type="file" id="modalFileInput" multiple accept=".pdf,image/*,.txt" class="hidden" onchange="handleModalFileUpload(event)">
+                            </label>
+                            <button onclick="loadModalSample()" class="px-3 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-xs font-medium">
+                                Reset Sample
+                            </button>
+                        </div>
+                        <p id="modalFileStatus" class="text-[11px] text-slate-500">Ready</p>
+                    </div>
+
+                    <!-- Tool-Specific Simple Controls -->
+                    <div id="modalDynamicControls" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-3">
+                        <!-- Injected dynamically -->
+                    </div>
+
+                    <!-- Output Summary & Export Buttons -->
+                    <div class="space-y-2.5 pt-1">
+                        <div class="flex justify-between text-xs text-slate-500">
+                            <span>Original: <strong id="modalOrigSize" class="text-slate-700 dark:text-slate-200">240 KB</strong></span>
+                            <span>Output: <strong id="modalOutSize" class="text-emerald-600 dark:text-emerald-400">Ready</strong></span>
+                        </div>
+                        <button onclick="runModalJsPDFExport()" class="w-full py-2.5 px-4 rounded-lg bg-[#3b5998] hover:bg-[#334e86] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>Download File</span>
+                        </button>
+                        <button onclick="instantPrintModalCanvas()" class="w-full py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            <span>Print Now</span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Right Live Preview (7 Cols) -->
+                <div class="md:col-span-7 bg-slate-100 dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center min-h-[340px]">
+                    <canvas id="modalPreviewCanvas" width="595" height="842" class="bg-white shadow rounded max-w-full h-auto" style="max-height: 390px;"></canvas>
+                    <pre id="modalTextPreview" class="hidden w-full h-80 p-3 bg-white dark:bg-slate-950 rounded border border-slate-200 dark:border-slate-800 text-xs font-mono overflow-auto whitespace-pre-wrap"></pre>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         CLEAN FOOTER
+         ===================================================================== -->
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-5 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div class="flex items-center gap-3">
+                <img 
+                    src="CyberBabu Tech Pharmacy Badge_2.png" 
+                    alt="CyberBabu" 
+                    class="cb-brand-logo w-11 h-11 object-contain drop-shadow-xs"
+                    onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1';this.src='CyberBabu Tech Pharmacy Badge.png';}else{this.style.display='none';}"
+                >
+                <div>
+                    <strong class="text-slate-800 dark:text-white">CyberBabu</strong> (Internet • Pharmacy • More) — An Innovation by the owner of <strong class="text-[#3b5998] dark:text-blue-400">Cyber Gigs</strong>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span>All Tasks Auto-Saved</span>
+                <span>•</span>
+                <span>Instant Print Ready</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- =====================================================================
+         APPLICATION SCRIPTS
+         ===================================================================== -->
+    <script>
+        if (window['pdfjsLib']) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        // Sync fallback SVG into hero if needed & restore exact saved PNG logo
+        function applyBrandLogoDataUrl(dataUrl) {
+            if (!dataUrl) return;
+            document.querySelectorAll('.cb-brand-logo').forEach(img => {
+                img.src = dataUrl;
+                img.style.display = '';
+            });
+            document.querySelectorAll('.cb-logo-fallback').forEach(svg => {
+                svg.classList.add('hidden');
+            });
+        }
+
+        function handleBrandLogoFileSelect(e) {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async ev => {
+                const dataUrl = ev.target.result;
+                await dbSaveItem('cb_exact_logo_png', dataUrl);
+                applyBrandLogoDataUrl(dataUrl);
+                showToast('Exact CyberBabu logo pinned & saved!');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // =================================================================
+        // PERSISTENCE ENGINE (IndexedDB + localStorage)
+        // Ensures refreshing the browser never loses the user's active task
+        // =================================================================
+        const DB_NAME = 'CyberBabuWorkspaceDB';
+        const DB_STORE = 'workspaceFiles';
+
+        function openWorkspaceDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(DB_STORE)) {
+                        db.createObjectStore(DB_STORE);
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function dbSaveItem(key, value) {
+            try {
+                const db = await openWorkspaceDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(DB_STORE, 'readwrite');
+                    tx.objectStore(DB_STORE).put(value, key);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch (_) {
+                return false;
+            }
+        }
+
+        async function dbLoadItem(key) {
+            try {
+                const db = await openWorkspaceDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(DB_STORE, 'readonly');
+                    const req = tx.objectStore(DB_STORE).get(key);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            } catch (_) {
+                return null;
+            }
+        }
+
+        // Non-blocking toast notification
+        function showToast(msg) {
+            const box = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = 'pointer-events-auto bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-lg shadow-lg border border-slate-700 flex items-center gap-2 transition-all';
+            el.innerHTML = `<span>✓</span><span>${msg}</span>`;
+            box.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 250);
+            }, 2800);
+        }
+
+        // Theme Toggle (Persisted)
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('cb_theme', isDark ? 'dark' : 'light');
+        }
+
+        // Top 2-Tab Navigation (Persisted)
+        function switchTab(tabId, skipSave = false) {
+            if (tabId !== 'pdf-tools' && tabId !== 'passport') {
+                tabId = 'pdf-tools';
+            }
+            ['pdf-tools', 'passport'].forEach(id => {
+                const section = document.getElementById(`view-${id}`);
+                const btn = document.getElementById(`tabBtn-${id}`);
+                if (id === tabId) {
+                    section.classList.remove('hidden');
+                    btn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap bg-white text-[#3b5998] shadow-sm';
+                } else {
+                    section.classList.add('hidden');
+                    btn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap text-white/90 hover:bg-white/15';
+                }
+            });
+            if (!skipSave) {
+                localStorage.setItem('cb_active_tab', tabId);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            if (tabId === 'passport') renderPassportAll(true);
+        }
+
+        // =================================================================
+        // COMPLETE CATALOG OF TOOLS FROM ATTACHED SCREENSHOTS
+        // =================================================================
+        const MOST_USED_LIST = [
+            { id: 'resize-pdf-kb', title: 'Compress PDF in KB' },
+            { id: 'merge-pdf', title: 'Merge PDF' },
+            { id: 'pdf-to-jpg', title: 'PDF to JPG' },
+            { id: 'pdf-to-word', title: 'PDF to Word' },
+            { id: 'word-to-pdf', title: 'Word to PDF' },
+            { id: 'image-to-pdf', title: 'Image to PDF' },
+            { id: 'increase-pdf-size', title: 'Increase PDF Size' },
+            { id: 'sign-pdf', title: 'Sign PDF' },
+            { id: 'edit-pdf', title: 'Edit PDF' },
+            { id: 'split-pdf', title: 'Split PDF' },
+            { id: 'compress-200kb', title: 'Compress PDF to 200KB' },
+            { id: 'compress-100kb', title: 'Compress PDF to 100KB' },
+            { id: 'fill-pdf-form', title: 'Fill PDF Form' },
+            { id: 'delete-pdf-pages', title: 'Delete PDF Pages' },
+            { id: 'crop-pdf', title: 'Crop PDF' }
+        ];
+
+        const CATEGORIES = [
+            {
+                id: 'compress',
+                title: 'Compress PDF',
+                tools: [
+                    { id: 'pdf-compressor-text', title: 'PDF Compressor (Keeps Text)', desc: 'Make a PDF smaller while every word stays selectable. Runs in your browser.', mode: 'compress', kb: 150 },
+                    { id: 'resize-pdf-kb', title: 'Resize PDF in KB', desc: 'Shrink a PDF to the exact KB a form or portal asks for.', mode: 'compress', kb: 100 },
+                    { id: 'increase-pdf-size', title: 'Increase PDF Size', desc: 'Make a PDF bigger, to 100KB, 500KB, 1MB or any size a form needs.', mode: 'increase', kb: 500 }
+                ]
+            },
+            {
+                id: 'merge-split',
+                title: 'Merge & Split PDF',
+                tools: [
+                    { id: 'merge-pdf', title: 'Merge PDFs (Rearrange & Remove Pages)', desc: 'Join PDFs into one file, then reorder or remove pages.', mode: 'organize' },
+                    { id: 'merge-compress-pdf', title: 'Merge & Compress PDF', desc: 'Join several PDFs and shrink the result to an exact size in one go.', mode: 'compress', kb: 200 },
+                    { id: 'image-to-pdf', title: 'Merge PDFs and Images', desc: 'Combine PDFs and JPG photos into one PDF, in any order.', mode: 'organize' },
+                    { id: 'split-pdf', title: 'Split PDF', desc: 'Split a PDF into pages, ranges or sizes, in your browser.', mode: 'organize' }
+                ]
+            },
+            {
+                id: 'convert-to-pdf',
+                title: 'Convert to PDF',
+                tools: [
+                    { id: 'word-to-pdf', title: 'Word to PDF', desc: 'Turn .docx, .doc, .odt or .rtf files into clean PDFs, up to 6 at once.', mode: 'text-to-pdf' },
+                    { id: 'ppt-to-pdf', title: 'PowerPoint to PDF', desc: 'Convert PowerPoint slides to PDF on your device. Nothing is uploaded.', mode: 'text-to-pdf' },
+                    { id: 'excel-to-pdf', title: 'Excel to PDF', desc: 'Convert Excel sheets to PDF with all the columns fitted on the page. Nothing is uploaded.', mode: 'text-to-pdf' },
+                    { id: 'text-to-pdf', title: 'Text to PDF', desc: 'Type or paste text and get a PDF with your font, page size and margins.', mode: 'text-to-pdf' },
+                    { id: 'epub-to-pdf', title: 'EPUB to PDF Converter', desc: 'Turn an EPUB ebook into a printable PDF with the page size and font you pick.', mode: 'text-to-pdf' },
+                    { id: 'ppt-viewer', title: 'PPT Viewer', desc: 'Open and present PowerPoint files online without PowerPoint.', mode: 'text-to-pdf' }
+                ]
+            },
+            {
+                id: 'convert-from-pdf',
+                title: 'Convert from PDF',
+                tools: [
+                    { id: 'pdf-to-word', title: 'Convert PDF To Word', desc: 'Convert a PDF to an editable Word file, free and with no watermark.', mode: 'extract', format: 'doc' },
+                    { id: 'pdf-to-jpg', title: 'Convert PDF To JPG', desc: 'Save PDF pages as high-quality JPG images, or pull out the images inside.', mode: 'extract', format: 'jpg' },
+                    { id: 'pdf-to-excel', title: 'PDF to Excel', desc: 'Turn PDF tables into rows and columns you can sort and add up.', mode: 'extract', format: 'csv' },
+                    { id: 'pdf-to-text', title: 'PDF to Text', desc: 'Copy or download the text of a PDF. Scanned pages are read too.', mode: 'extract', format: 'txt' },
+                    { id: 'pdf-to-epub', title: 'PDF to EPUB Converter', desc: 'Turn one or more PDFs into an ebook for your reader.', mode: 'extract', format: 'txt' },
+                    { id: 'ocr-pdf', title: 'OCR PDF', desc: 'Make a scanned PDF searchable and copyable, in 110+ languages.', mode: 'extract', format: 'txt' },
+                    { id: 'count-words-pdf', title: 'Count Words in PDF', desc: 'Count the words and characters in a PDF.', mode: 'extract', format: 'txt' }
+                ]
+            },
+            {
+                id: 'edit-sign',
+                title: 'Edit, Sign & Fill PDF',
+                tools: [
+                    { id: 'edit-pdf', title: 'Edit PDF Online', desc: 'Edit text and images, add or remove pages, sign, and add links.', mode: 'edit' },
+                    { id: 'sign-pdf', title: 'Sign PDF', desc: 'Draw, type or upload your signature and place it on any PDF.', mode: 'edit' },
+                    { id: 'fill-pdf-form', title: 'Fill PDF Form', desc: 'Type into the fields, tick boxes and sign, then download the filled form.', mode: 'edit' },
+                    { id: 'add-image-pdf', title: 'Add Image to PDF', desc: 'Place a photo, logo or stamp on any page, resize it and set its opacity.', mode: 'edit' },
+                    { id: 'pdf-highlighter', title: 'PDF Highlighter', desc: 'Highlight text in a PDF in the color you choose.', mode: 'edit', sub: 'highlight' },
+                    { id: 'pdf-Redactor', title: 'PDF Redactor', desc: 'Black out text or images so they are removed for good, not just covered.', mode: 'edit', sub: 'redact' },
+                    { id: 'pdf-watermark', title: 'PDF Watermark', desc: 'Stamp text or an image across your pages, with a live preview.', mode: 'edit', sub: 'watermark' },
+                    { id: 'pdf-contrast', title: 'PDF Contrast Editor', desc: 'Brighten faded scans, sharpen dim text, or make a PDF grayscale.', mode: 'edit', sub: 'contrast' },
+                    { id: 'edit-pdf-classic', title: 'Edit PDF Online (Classic Version)', desc: 'The classic editor layout, kept for people who prefer its simplicity.', mode: 'edit' }
+                ]
+            },
+            {
+                id: 'organize',
+                title: 'Organize PDF Pages',
+                tools: [
+                    { id: 'rearrange-pdf', title: 'Rearrange PDF Pages', desc: 'Put the pages of a PDF in a new order, then save.', mode: 'organize' },
+                    { id: 'delete-pdf-pages', title: 'Delete PDF Pages', desc: 'Delete the pages you do not need from a PDF.', mode: 'organize' },
+                    { id: 'rotate-pdf', title: 'Rotate PDF', desc: 'Turn one page or the whole PDF the right way up.', mode: 'organize' },
+                    { id: 'crop-pdf', title: 'Crop PDF', desc: 'Trim the margins of every page, or set a different crop for each.', mode: 'crop', preset: 'custom' },
+                    { id: 'crop-single-page', title: 'Crop Single PDF Page', desc: 'Crop one page of a PDF without touching the rest.', mode: 'crop', preset: 'custom' },
+                    { id: 'crop-image-pdf', title: 'Crop Image from PDF', desc: 'Cut a picture out of a PDF page and save it as an image.', mode: 'crop', preset: 'custom' },
+                    { id: 'change-size-a4', title: 'Change PDF Page Size to A4', desc: 'Make every page the same size: A4, Letter, Legal, A3 or A5.', mode: 'organize' },
+                    { id: 'multi-pages-sheet', title: 'Multiple Pages Per Sheet', desc: 'Put 2, 4, 6 or more pages on one sheet, with a live preview.', mode: 'organize' },
+                    { id: 'two-pages-sheet', title: '2 Pages Per Sheet', desc: 'Print two pages on one sheet, side by side or stacked.', mode: 'organize' },
+                    { id: 'add-page-num', title: 'Add Page Number to PDF', desc: 'Add page numbers in the position and style you want.', mode: 'organize' },
+                    { id: 'add-bates-num', title: 'Add Bates Numbering to PDF', desc: 'Stamp Bates numbers on legal papers with your own prefix and start number.', mode: 'organize' }
+                ]
+            },
+            {
+                id: 'protect',
+                title: 'Protect PDF',
+                tools: [
+                    { id: 'password-protect', title: 'Password Protect PDF', desc: 'Lock a PDF with a password and limit printing or editing.', mode: 'protect' },
+                    { id: 'unlock-pdf', title: 'Unlock PDF', desc: 'Take the password off a PDF you own, in your browser.', mode: 'protect' }
+                ]
+            },
+            {
+                id: 'shipping',
+                title: 'Shipping Label Croppers',
+                tools: [
+                    { id: 'meesho-cropper', title: 'Meesho Label Cropper', desc: 'Crop Meesho shipping labels for thermal or A4 printing.', mode: 'crop', preset: 'meesho' },
+                    { id: 'flipkart-cropper', title: 'Flipkart Label Cropper', desc: 'Crop Flipkart shipping labels, with no file size limit.', mode: 'crop', preset: 'flipkart' },
+                    { id: 'amazon-cropper', title: 'Amazon Label Cropper', desc: 'Crop Amazon Easy Ship and Self Ship labels to 4x6 and skip the invoice pages.', mode: 'crop', preset: 'amazon' }
+                ]
+            },
+            {
+                id: 'more-compress',
+                title: 'More Compress & Resize Tools',
+                tools: [
+                    { id: 'reduce-pdf-size', title: 'Reduce PDF Size', desc: 'Reduce a PDF to 100KB, 200KB, 1MB or any size you type.', mode: 'compress', kb: 100 },
+                    { id: 'resize-pdf-mb', title: 'Resize PDF in MB', desc: 'Bring a big PDF under 1MB, 2MB, 5MB or 10MB.', mode: 'compress', kb: 1024 },
+                    { id: 'resize-pdf', title: 'Resize PDF', desc: 'Change a PDF to the file size you want.', mode: 'compress', kb: 150 },
+                    { id: 'pdf-kb-to-mb', title: 'PDF KB to MB', desc: 'Resize a PDF to an exact MB size like 1MB, 2MB or 5MB.', mode: 'increase', kb: 1024 },
+                    { id: 'compress-20kb', title: 'Compress PDF To 20kb', desc: 'Get a signature page or ID scan under 20KB in your browser.', mode: 'compress', kb: 20 },
+                    { id: 'compress-25kb', title: 'Compress PDF To 25kb', desc: 'Land between the 20KB and 50KB upload limits, with no watermark.', mode: 'compress', kb: 25 },
+                    { id: 'compress-30kb', title: 'Compress PDF To 30kb', desc: 'Get a scanned page under 30KB and keep it readable.', mode: 'compress', kb: 30 },
+                    { id: 'compress-40kb', title: 'Compress PDF To 40kb', desc: 'Fit a page or two under 40KB, free in your browser.', mode: 'compress', kb: 40 },
+                    { id: 'compress-50kb', title: 'Compress PDF To 50kb', desc: 'Compress any PDF to 50KB or less in a few seconds.', mode: 'compress', kb: 50 },
+                    { id: 'compress-100kb', title: 'Compress PDF To 100kb', desc: 'Reduce a PDF to 100KB for job forms and admissions.', mode: 'compress', kb: 100 },
+                    { id: 'compress-150kb', title: 'Compress PDF To 150kb', desc: 'Bring a PDF down to 150KB and keep the text readable.', mode: 'compress', kb: 150 },
+                    { id: 'compress-200kb', title: 'Compress PDF To 200kb', desc: 'Shrink a PDF to 200KB, the most common upload limit.', mode: 'compress', kb: 200 },
+                    { id: 'compress-250kb', title: 'Compress PDF To 250kb', desc: 'Compress a PDF to 250KB with a few clicks.', mode: 'compress', kb: 250 },
+                    { id: 'compress-300kb', title: 'Compress PDF To 300kb', desc: 'Get a PDF under 300KB for government and exam portals.', mode: 'compress', kb: 300 },
+                    { id: 'compress-400kb', title: 'Compress PDF To 400kb', desc: 'Reduce a PDF to 400KB and keep the quality.', mode: 'compress', kb: 400 },
+                    { id: 'compress-500kb', title: 'Compress PDF To 500kb', desc: 'Shrink a PDF to 500KB for email and online forms.', mode: 'compress', kb: 500 },
+                    { id: 'compress-1mb', title: 'Compress PDF To 1MB', desc: 'Get a PDF under 1MB for faster uploads and sharing.', mode: 'compress', kb: 1024 },
+                    { id: 'compress-2mb', title: 'Compress PDF To 2MB', desc: 'Compress a PDF to 2MB in seconds.', mode: 'compress', kb: 2048 },
+                    { id: 'compress-3mb', title: 'Compress PDF To 3MB', desc: 'Bring a PDF down to 3MB without losing quality.', mode: 'compress', kb: 3072 },
+                    { id: 'compress-4mb', title: 'Compress PDF To 4MB', desc: 'Reduce a PDF to 4MB and save storage space.', mode: 'compress', kb: 4096 },
+                    { id: 'compress-5mb', title: 'Compress PDF To 5MB', desc: 'Get a large PDF under 5MB while it stays sharp.', mode: 'compress', kb: 5120 },
+                    { id: 'compress-10mb', title: 'Compress PDF To 10MB', desc: 'Shrink a very large PDF to 10MB or less.', mode: 'compress', kb: 10240 }
+                ]
+            }
+        ];
+
+        const TOOL_LOOKUP = {};
+        CATEGORIES.forEach(c => c.tools.forEach(t => { TOOL_LOOKUP[t.id] = t; }));
+
+        let selectedCategory = localStorage.getItem('cb_selected_cat') || 'all';
+
+        function selectCategoryPill(catId) {
+            selectedCategory = catId;
+            localStorage.setItem('cb_selected_cat', catId);
+            renderCategoryPills();
+            filterTools();
+        }
+
+        function renderCategoryPills() {
+            const container = document.getElementById('categoryFilterPills');
+            const pills = [{ id: 'all', title: 'All Categories' }, ...CATEGORIES];
+            container.innerHTML = pills.map(p => {
+                const active = selectedCategory === p.id;
+                return `
+                    <button onclick="selectCategoryPill('${p.id}')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
+                        active 
+                        ? 'bg-[#3b5998] text-white shadow-xs' 
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                    }">
+                        ${p.title}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function filterTools() {
+            const query = document.getElementById('toolSearchInput').value.trim().toLowerCase();
+            localStorage.setItem('cb_search_query', query);
+            document.getElementById('clearSearchBtn').classList.toggle('hidden', !query);
+
+            const mostUsedBox = document.getElementById('mostUsedBox');
+            const mostUsedGrid = document.getElementById('mostUsedGrid');
+            if (selectedCategory !== 'all' || query) {
+                mostUsedBox.classList.add('hidden');
+            } else {
+                mostUsedBox.classList.remove('hidden');
+                mostUsedGrid.innerHTML = MOST_USED_LIST.map(item => `
+                    <button onclick="openTool('${item.id}')" class="py-2.5 px-3 rounded-lg border border-blue-200 dark:border-slate-600 bg-white dark:bg-slate-900 hover:border-[#3b5998] hover:bg-blue-50/50 text-[#3b5998] dark:text-blue-300 text-xs sm:text-sm font-medium text-center truncate transition">
+                        ${item.title}
+                    </button>
+                `).join('');
+            }
+
+            const dir = document.getElementById('toolsDirectoryContainer');
+            let html = '';
+
+            CATEGORIES.forEach(cat => {
+                if (selectedCategory !== 'all' && selectedCategory !== cat.id) return;
+
+                const matched = cat.tools.filter(t => 
+                    !query || 
+                    t.title.toLowerCase().includes(query) || 
+                    t.desc.toLowerCase().includes(query)
+                );
+
+                if (matched.length > 0) {
+                    html += `
+                        <div class="space-y-3.5">
+                            <h2 class="text-base font-bold text-slate-800 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">
+                                ${cat.title}
+                            </h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                ${matched.map(tool => `
+                                    <div onclick="openTool('${tool.id}')" class="tool-card bg-[#f8faff] dark:bg-slate-800 rounded-lg p-5 border border-blue-200/80 dark:border-slate-700 flex flex-col justify-between text-center cursor-pointer">
+                                        <div class="space-y-2">
+                                            <h3 class="text-sm sm:text-base font-bold text-[#2b4c9b] dark:text-blue-300">
+                                                ${tool.title}
+                                            </h3>
+                                            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                                ${tool.desc}
+                                            </p>
+                                        </div>
+                                        <div class="pt-4">
+                                            <span class="inline-block px-4 py-1.5 rounded bg-[#3b5998] hover:bg-[#334e86] text-white text-xs font-semibold shadow-2xs transition">
+                                                Open Tool
+                                            </span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            dir.innerHTML = html || `
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-8 text-center border border-slate-200 dark:border-slate-700 space-y-2">
+                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">No tools found matching "${query}"</p>
+                    <button onclick="clearToolSearch()" class="text-xs text-[#3b5998] font-semibold underline">Reset Search</button>
+                </div>
+            `;
+        }
+
+        function clearToolSearch() {
+            document.getElementById('toolSearchInput').value = '';
+            selectedCategory = 'all';
+            localStorage.setItem('cb_selected_cat', 'all');
+            localStorage.setItem('cb_search_query', '');
+            renderCategoryPills();
+            filterTools();
+        }
+
+        // =================================================================
+        // FEATURE 2: SIMPLE INDIAN PASSPORT PHOTO MAKER ENGINE (AUTO-SAVED)
+        // =================================================================
+        let ppState = {
+            img: null,
+            wMm: 35,
+            hMm: 45,
+            rot: 0,
+            flipH: 1,
+            keyRGB: { r: 16, g: 185, b: 129 },
+            bgHex: '#0047AB',
+            copies: 8
+        };
+
+        function savePassportStateToStorage() {
+            const meta = {
+                wMm: ppState.wMm,
+                hMm: ppState.hMm,
+                rot: ppState.rot,
+                flipH: ppState.flipH,
+                keyRGB: ppState.keyRGB,
+                bgHex: ppState.bgHex,
+                copies: ppState.copies,
+                sizeSelect: document.getElementById('ppSizeSelect')?.value || '35x45',
+                sheetSelect: document.getElementById('ppSheetSelect')?.value || 'A4',
+                zoom: document.getElementById('ppZoom')?.value || 100,
+                panX: document.getElementById('ppPanX')?.value || 0,
+                panY: document.getElementById('ppPanY')?.value || 0,
+                tilt: document.getElementById('ppTilt')?.value || 0,
+                removeBg: document.getElementById('ppRemoveBg')?.checked ?? true,
+                sensitivity: document.getElementById('ppSensitivity')?.value || 38,
+                brightness: document.getElementById('ppBrightness')?.value || 105,
+                showNameDate: document.getElementById('ppShowNameDate')?.checked ?? false,
+                nameText: document.getElementById('ppNameText')?.value || 'AARAV SHARMA',
+                dateText: document.getElementById('ppDateText')?.value || '13/11/2026'
+            };
+            localStorage.setItem('cb_passport_meta', JSON.stringify(meta));
+        }
+
+        async function restorePassportStateFromStorage() {
+            const savedMetaStr = localStorage.getItem('cb_passport_meta');
+            const savedImgDataUrl = await dbLoadItem('cb_passport_img');
+
+            if (savedMetaStr) {
+                try {
+                    const m = JSON.parse(savedMetaStr);
+                    ppState.wMm = m.wMm || 35;
+                    ppState.hMm = m.hMm || 45;
+                    ppState.rot = m.rot || 0;
+                    ppState.flipH = m.flipH || 1;
+                    ppState.keyRGB = m.keyRGB || { r: 16, g: 185, b: 129 };
+                    ppState.bgHex = m.bgHex || '#0047AB';
+                    ppState.copies = m.copies || 8;
+
+                    if (document.getElementById('ppSizeSelect')) document.getElementById('ppSizeSelect').value = m.sizeSelect || '35x45';
+                    if (document.getElementById('ppSheetSelect')) document.getElementById('ppSheetSelect').value = m.sheetSelect || 'A4';
+                    if (document.getElementById('ppZoom')) document.getElementById('ppZoom').value = m.zoom ?? 100;
+                    if (document.getElementById('ppPanX')) document.getElementById('ppPanX').value = m.panX ?? 0;
+                    if (document.getElementById('ppPanY')) document.getElementById('ppPanY').value = m.panY ?? 0;
+                    if (document.getElementById('ppTilt')) document.getElementById('ppTilt').value = m.tilt ?? 0;
+                    if (document.getElementById('ppRemoveBg')) document.getElementById('ppRemoveBg').checked = m.removeBg ?? true;
+                    if (document.getElementById('ppSensitivity')) document.getElementById('ppSensitivity').value = m.sensitivity ?? 38;
+                    if (document.getElementById('ppBrightness')) document.getElementById('ppBrightness').value = m.brightness ?? 105;
+                    if (document.getElementById('ppQtyInput')) document.getElementById('ppQtyInput').value = ppState.copies;
+                    if (document.getElementById('ppShowNameDate')) document.getElementById('ppShowNameDate').checked = Boolean(m.showNameDate);
+                    if (document.getElementById('ppNameText')) document.getElementById('ppNameText').value = m.nameText || 'AARAV SHARMA';
+                    if (document.getElementById('ppDateText')) document.getElementById('ppDateText').value = m.dateText || '13/11/2026';
+
+                    const sc = document.getElementById('singlePhotoCanvas');
+                    sc.width = Math.round(ppState.wMm * 10);
+                    sc.height = Math.round(ppState.hMm * 10);
+                } catch (_) {}
+            }
+
+            if (savedImgDataUrl) {
+                const img = new Image();
+                img.onload = () => {
+                    ppState.img = img;
+                    renderPassportAll(true);
+                };
+                img.src = savedImgDataUrl;
+            } else {
+                loadSamplePassportPhoto(true);
+            }
+        }
+
+        function resetPassportTask() {
+            localStorage.removeItem('cb_passport_meta');
+            dbSaveItem('cb_passport_img', null);
+            resetPassportCrop(false);
+            ppState.bgHex = '#0047AB';
+            ppState.copies = 8;
+            document.getElementById('ppQtyInput').value = 8;
+            document.getElementById('ppRemoveBg').checked = true;
+            document.getElementById('ppSensitivity').value = 38;
+            document.getElementById('ppBrightness').value = 105;
+            loadSamplePassportPhoto(false);
+            showToast('Passport photo workspace reset.');
+        }
+
+        function loadSamplePassportPhoto(skipSave = false) {
+            const c = document.createElement('canvas');
+            c.width = 450;
+            c.height = 560;
+            const ctx = c.getContext('2d');
+
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(0, 0, c.width, c.height);
+
+            const cx = 225, cy = 240;
+
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.ellipse(cx, 500, 160, 120, 0, Math.PI, 0, false);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(cx - 48, 385);
+            ctx.lineTo(cx + 48, 385);
+            ctx.lineTo(cx, 480);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.moveTo(cx - 12, 405);
+            ctx.lineTo(cx + 12, 405);
+            ctx.lineTo(cx + 16, 495);
+            ctx.lineTo(cx, 515);
+            ctx.lineTo(cx - 16, 495);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#e0ac69';
+            ctx.fillRect(cx - 36, 320, 72, 75);
+            ctx.fillStyle = '#f1c27d';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 86, 110, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#171717';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy - 50, 90, 68, 0, Math.PI, 0, false);
+            ctx.fill();
+
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(cx - 32, cy - 5, 7, 0, Math.PI * 2);
+            ctx.arc(cx + 32, cy - 5, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#991b1b';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(cx - 24, cy + 52);
+            ctx.quadraticCurveTo(cx, cy + 64, cx + 24, cy + 52);
+            ctx.stroke();
+
+            const dataUrl = c.toDataURL('image/png');
+            const img = new Image();
+            img.onload = () => {
+                ppState.img = img;
+                ppState.keyRGB = { r: 16, g: 185, b: 129 };
+                renderPassportAll(skipSave);
+            };
+            img.src = dataUrl;
+        }
+
+        function handlePassportUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async ev => {
+                const dataUrl = ev.target.result;
+                await dbSaveItem('cb_passport_img', dataUrl);
+                const img = new Image();
+                img.onload = () => {
+                    ppState.img = img;
+                    const tmp = document.createElement('canvas');
+                    tmp.width = img.width;
+                    tmp.height = img.height;
+                    const tctx = tmp.getContext('2d');
+                    tctx.drawImage(img, 0, 0);
+                    const p = tctx.getImageData(5, 5, 1, 1).data;
+                    ppState.keyRGB = { r: p[0], g: p[1], b: p[2] };
+                    resetPassportCrop(false);
+                    renderPassportAll(false);
+                    showToast('Photo uploaded and saved.');
+                };
+                img.src = dataUrl;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const sc = document.getElementById('singlePhotoCanvas');
+            sc.addEventListener('click', e => {
+                if (!ppState.img) return;
+                const rect = sc.getBoundingClientRect();
+                const x = Math.floor((e.clientX - rect.left) * (sc.width / rect.width));
+                const y = Math.floor((e.clientY - rect.top) * (sc.height / rect.height));
+                const raw = drawTransformedPassportRaw(sc.width, sc.height);
+                const p = raw.getContext('2d').getImageData(x, y, 1, 1).data;
+                ppState.keyRGB = { r: p[0], g: p[1], b: p[2] };
+                document.getElementById('ppRemoveBg').checked = true;
+                renderPassportAll(false);
+                showToast('Background color removed.');
+            });
+        });
+
+        function rotatePassport(deg) {
+            ppState.rot = (ppState.rot + deg) % 360;
+            renderPassportAll(false);
+        }
+
+        function flipPassportH() {
+            ppState.flipH *= -1;
+            renderPassportAll(false);
+        }
+
+        function resetPassportCrop(rerender = true) {
+            ppState.rot = 0;
+            ppState.flipH = 1;
+            document.getElementById('ppZoom').value = 100;
+            document.getElementById('ppPanX').value = 0;
+            document.getElementById('ppPanY').value = 0;
+            document.getElementById('ppTilt').value = 0;
+            if (rerender) renderPassportAll(false);
+        }
+
+        function setPassportBg(hex) {
+            ppState.bgHex = hex;
+            renderPassportAll(false);
+        }
+
+        function changePassportDimensions() {
+            const [w, h] = document.getElementById('ppSizeSelect').value.split('x').map(Number);
+            ppState.wMm = w;
+            ppState.hMm = h;
+            const sc = document.getElementById('singlePhotoCanvas');
+            sc.width = Math.round(w * 10);
+            sc.height = Math.round(h * 10);
+            renderPassportAll(false);
+        }
+
+        function setPassportCopyCount(n) {
+            ppState.copies = Math.max(1, Math.min(60, parseInt(n) || 8));
+            document.getElementById('ppQtyInput').value = ppState.copies;
+            renderPassportSheet();
+            savePassportStateToStorage();
+        }
+
+        function drawTransformedPassportRaw(w, h) {
+            const c = document.createElement('canvas');
+            c.width = w;
+            c.height = h;
+            const ctx = c.getContext('2d');
+            if (!ppState.img) return c;
+
+            const zoom = parseFloat(document.getElementById('ppZoom').value) / 100;
+            const panX = parseFloat(document.getElementById('ppPanX').value);
+            const panY = parseFloat(document.getElementById('ppPanY').value);
+            const tilt = parseFloat(document.getElementById('ppTilt').value);
+            const bright = document.getElementById('ppBrightness').value;
+
+            ctx.save();
+            ctx.filter = `brightness(${bright}%) contrast(104%)`;
+            ctx.translate(w / 2 + panX, h / 2 + panY);
+            ctx.rotate(((ppState.rot + tilt) * Math.PI) / 180);
+            ctx.scale(zoom * ppState.flipH, zoom);
+
+            const scale = Math.max(w / ppState.img.width, h / ppState.img.height);
+            const dw = ppState.img.width * scale;
+            const dh = ppState.img.height * scale;
+            ctx.drawImage(ppState.img, -dw / 2, -dh / 2, dw, dh);
+            ctx.restore();
+            return c;
+        }
+
+        function renderPassportAll(skipSave = false) {
+            if (!ppState.img) return;
+
+            document.getElementById('ppZoomLabel').textContent = `${document.getElementById('ppZoom').value}%`;
+            document.getElementById('ppTiltLabel').textContent = `${document.getElementById('ppTilt').value}°`;
+            document.getElementById('ppSensLabel').textContent = document.getElementById('ppSensitivity').value;
+            document.getElementById('ppBrightLabel').textContent = `${document.getElementById('ppBrightness').value}%`;
+
+            const showStrip = document.getElementById('ppShowNameDate').checked;
+            document.getElementById('ppNameDateFields').classList.toggle('hidden', !showStrip);
+
+            const sc = document.getElementById('singlePhotoCanvas');
+            const w = sc.width, h = sc.height;
+            const ctx = sc.getContext('2d');
+
+            ctx.fillStyle = ppState.bgHex;
+            ctx.fillRect(0, 0, w, h);
+
+            const raw = drawTransformedPassportRaw(w, h);
+            if (document.getElementById('ppRemoveBg').checked) {
+                const rctx = raw.getContext('2d');
+                const imgData = rctx.getImageData(0, 0, w, h);
+                const d = imgData.data;
+                const tol = parseFloat(document.getElementById('ppSensitivity').value) * 2.3;
+                const feather = 18;
+                const { r: kr, g: kg, b: kb } = ppState.keyRGB;
+
+                for (let i = 0; i < d.length; i += 4) {
+                    const dist = Math.sqrt((d[i] - kr) ** 2 + (d[i + 1] - kg) ** 2 + (d[i + 2] - kb) ** 2);
+                    if (dist < tol) {
+                        d[i + 3] = 0;
+                    } else if (dist < tol + feather) {
+                        d[i + 3] = Math.round(d[i + 3] * ((dist - tol) / feather));
+                    }
+                }
+                rctx.putImageData(imgData, 0, 0);
+            }
+
+            ctx.drawImage(raw, 0, 0);
+
+            if (showStrip) {
+                const sh = Math.round(h * 0.15);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, h - sh, w, sh);
+                ctx.fillStyle = '#000000';
+                ctx.textAlign = 'center';
+                ctx.font = `bold ${Math.round(sh * 0.36)}px Inter, sans-serif`;
+                ctx.fillText((document.getElementById('ppNameText').value || 'NAME').toUpperCase(), w / 2, h - sh * 0.52);
+                ctx.font = `600 ${Math.round(sh * 0.30)}px Inter, sans-serif`;
+                ctx.fillText(`DOP: ${document.getElementById('ppDateText').value || ''}`, w / 2, h - sh * 0.15);
+            }
+
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(1.5, 1.5, w - 3, h - 3);
+
+            renderPassportSheet();
+            if (!skipSave) savePassportStateToStorage();
+        }
+
+        function renderPassportSheet() {
+            const sc = document.getElementById('singlePhotoCanvas');
+            const sheet = document.getElementById('sheetPreviewCanvas');
+            const is4x6 = document.getElementById('ppSheetSelect').value === '4x6';
+
+            const paperW = is4x6 ? 152.4 : 210;
+            const paperH = is4x6 ? 101.6 : 297;
+            const scale = 5;
+
+            sheet.width = Math.round(paperW * scale);
+            sheet.height = Math.round(paperH * scale);
+            const ctx = sheet.getContext('2d');
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, sheet.width, sheet.height);
+
+            const gap = 3.5;
+            const margin = 5;
+            const cols = Math.max(1, Math.floor((paperW - margin * 2 + gap) / (ppState.wMm + gap)));
+            const rows = Math.max(1, Math.floor((paperH - margin * 2 + gap) / (ppState.hMm + gap)));
+            const maxOnPage = cols * rows;
+            const count = Math.min(ppState.copies, maxOnPage);
+
+            const gridW = cols * ppState.wMm + (cols - 1) * gap;
+            const startX = (paperW - gridW) / 2;
+            const startY = margin + 2;
+
+            for (let i = 0; i < count; i++) {
+                const r = Math.floor(i / cols);
+                const c = i % cols;
+                const x = (startX + c * (ppState.wMm + gap)) * scale;
+                const y = (startY + r * (ppState.hMm + gap)) * scale;
+                ctx.drawImage(sc, x, y, ppState.wMm * scale, ppState.hMm * scale);
+            }
+
+            document.getElementById('ppSheetSummary').textContent = `${is4x6 ? '4×6 Photo Paper' : 'A4 Sheet'} • ${ppState.copies} Copies`;
+        }
+
+        function downloadPassportJsPDF() {
+            const { jsPDF } = window.jspdf;
+            const is4x6 = document.getElementById('ppSheetSelect').value === '4x6';
+            const paperW = is4x6 ? 152.4 : 210;
+            const paperH = is4x6 ? 101.6 : 297;
+            const orient = paperW > paperH ? 'l' : 'p';
+
+            const doc = new jsPDF({ orientation: orient, unit: 'mm', format: [paperW, paperH] });
+            const imgData = document.getElementById('singlePhotoCanvas').toDataURL('image/jpeg', 0.95);
+
+            const gap = 3.5, margin = 5;
+            const cols = Math.max(1, Math.floor((paperW - margin * 2 + gap) / (ppState.wMm + gap)));
+            const rows = Math.max(1, Math.floor((paperH - margin * 2 + gap) / (ppState.hMm + gap)));
+            const maxOnPage = cols * rows;
+            const startX = (paperW - (cols * ppState.wMm + (cols - 1) * gap)) / 2;
+            const startY = margin + 2;
+
+            let rem = ppState.copies, page = 0;
+            while (rem > 0) {
+                if (page > 0) doc.addPage([paperW, paperH], orient);
+                const n = Math.min(rem, maxOnPage);
+                for (let i = 0; i < n; i++) {
+                    const r = Math.floor(i / cols), c = i % cols;
+                    doc.addImage(imgData, 'JPEG', startX + c * (ppState.wMm + gap), startY + r * (ppState.hMm + gap), ppState.wMm, ppState.hMm);
+                }
+                rem -= n;
+                page++;
+            }
+
+            doc.save(`CyberBabu_Passport_${ppState.copies}_Copies.pdf`);
+            showToast(`Downloaded ${ppState.copies} Passport Photos PDF.`);
+        }
+
+        function instantPrintPassport() {
+            const url = document.getElementById('sheetPreviewCanvas').toDataURL('image/png');
+            const area = document.getElementById('instantPrintArea');
+            area.innerHTML = `<img src="${url}" />`;
+            area.classList.remove('hidden');
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => area.classList.add('hidden'), 400);
+            }, 120);
+        }
+
+        // =================================================================
+        // MODAL WORKBENCH FOR ALL 60+ PDF TOOLS (WITH AUTO-SAVE)
+        // =================================================================
+        let modalState = {
+            tool: null,
+            srcCanvas: null,
+            rot: 0,
+            extractedText: 'CYBERBABU DOCUMENT\nOrder ID: #CB-2026-8812\nApplicant: Rahul Sharma\nStatus: Verified & Ready'
+        };
+
+        function openTool(toolId, skipSave = false) {
+            const tool = TOOL_LOOKUP[toolId] || { id: toolId, title: 'PDF Tool', desc: 'Fast browser tool', mode: 'compress', kb: 100 };
+            modalState.tool = tool;
+            modalState.rot = 0;
+
+            document.getElementById('modalTitle').textContent = tool.title;
+            document.getElementById('modalSubtitle').textContent = tool.desc;
+            buildModalControls(tool);
+
+            if (!modalState.srcCanvas) loadModalSample();
+            else renderModalPreview();
+
+            document.getElementById('toolModal').classList.remove('hidden');
+            if (!skipSave) localStorage.setItem('cb_open_modal_tool', toolId);
+        }
+
+        function closeModal() {
+            document.getElementById('toolModal').classList.add('hidden');
+            localStorage.removeItem('cb_open_modal_tool');
+        }
+
+        function buildModalControls(tool) {
+            const box = document.getElementById('modalDynamicControls');
+            if (tool.mode === 'compress' || tool.mode === 'increase') {
+                const kb = tool.kb || 100;
+                box.innerHTML = `
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-200">Target Size (KB):</label>
+                        <input type="number" id="modalTargetKb" value="${kb}" oninput="renderModalPreview()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs font-semibold">
+                        <label class="block text-xs text-slate-500 pt-1">Quality Level:</label>
+                        <input type="range" id="modalQual" min="15" max="95" value="75" oninput="renderModalPreview()" class="w-full accent-[#3b5998]">
+                    </div>
+                `;
+            } else if (tool.mode === 'crop') {
+                const p = tool.preset || 'meesho';
+                const hVal = p === 'custom' ? 80 : 48;
+                box.innerHTML = `
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-200">Crop Area (%):</label>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div><span>Top</span><input type="range" id="mCropTop" min="0" max="50" value="3" oninput="renderModalPreview()" class="w-full accent-[#3b5998]"></div>
+                            <div><span>Left</span><input type="range" id="mCropLeft" min="0" max="50" value="4" oninput="renderModalPreview()" class="w-full accent-[#3b5998]"></div>
+                            <div><span>Width</span><input type="range" id="mCropW" min="30" max="100" value="92" oninput="renderModalPreview()" class="w-full accent-[#3b5998]"></div>
+                            <div><span>Height</span><input type="range" id="mCropH" min="25" max="100" value="${hVal}" oninput="renderModalPreview()" class="w-full accent-[#3b5998]"></div>
+                        </div>
+                    </div>
+                `;
+            } else if (tool.mode === 'edit') {
+                box.innerHTML = `
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-200">Text or Signature:</label>
+                        <input type="text" id="mEditTxt" value="Approved & Signed" oninput="renderModalPreview()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-xs">
+                        <label class="block text-xs text-slate-500">Vertical Position:</label>
+                        <input type="range" id="mEditY" min="15" max="85" value="55" oninput="renderModalPreview()" class="w-full accent-[#3b5998]">
+                    </div>
+                `;
+            } else if (tool.mode === 'text-to-pdf') {
+                box.innerHTML = `
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-200">Document Text:</label>
+                        <textarea id="mTextToPdf" rows="4" oninput="renderModalPreview()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-xs">OFFICIAL DOCUMENT\nApplicant Name: Aarav Sharma\nDate: 13/11/2026</textarea>
+                    </div>
+                `;
+            } else {
+                box.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <button onclick="modalState.rot=(modalState.rot+90)%360;renderModalPreview()" class="w-full py-2 px-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-xs font-semibold">
+                            Rotate Page +90°
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function loadModalSample() {
+            const c = document.createElement('canvas');
+            c.width = 595;
+            c.height = 842;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, 595, 842);
+
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(30, 30, 535, 340);
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 16px Inter, sans-serif';
+            ctx.fillText('SHIPPING LABEL • MEESHO / FLIPKART / AMAZON', 50, 65);
+            ctx.font = '12px monospace';
+            ctx.fillText('AWB: CB9812739182IN  |  Order: #CB-2026-991', 50, 92);
+            for (let x = 50; x < 310; x += 6) ctx.fillRect(x, 110, x % 12 === 0 ? 4 : 2, 42);
+            ctx.font = 'bold 13px Inter, sans-serif';
+            ctx.fillText('Deliver To: Rahul Sharma, Sector 18, Noida, UP', 50, 185);
+
+            ctx.font = 'bold 15px Inter, sans-serif';
+            ctx.fillText('TAX INVOICE & APPLICATION SUMMARY', 50, 440);
+            ctx.font = '12px Inter, sans-serif';
+            ctx.fillText('Upload your own PDF or image on the left to process and download.', 50, 470);
+
+            modalState.srcCanvas = c;
+            document.getElementById('modalFileStatus').textContent = 'Sample loaded';
+            renderModalPreview();
+        }
+
+        async function handleModalFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('modalOrigSize').textContent = `${(file.size / 1024).toFixed(1)} KB`;
+            document.getElementById('modalFileStatus').textContent = file.name;
+
+            if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+                const buf = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+                const page = await pdf.getPage(1);
+                const vp = page.getViewport({ scale: 1.35 });
+                const c = document.createElement('canvas');
+                c.width = vp.width;
+                c.height = vp.height;
+                await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+                const tc = await page.getTextContent();
+                modalState.extractedText = tc.items.map(i => i.str).join(' ');
+                modalState.srcCanvas = c;
+                await dbSaveItem('cb_modal_canvas_data', c.toDataURL('image/jpeg', 0.9));
+                localStorage.setItem('cb_modal_filename', file.name);
+            } else if (file.type.startsWith('image/')) {
+                const url = URL.createObjectURL(file);
+                const img = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = url; });
+                const c = document.createElement('canvas');
+                c.width = 595;
+                c.height = 842;
+                const ctx = c.getContext('2d');
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, 595, 842);
+                const s = Math.min(535 / img.width, 780 / img.height);
+                ctx.drawImage(img, (595 - img.width * s) / 2, (842 - img.height * s) / 2, img.width * s, img.height * s);
+                modalState.srcCanvas = c;
+                await dbSaveItem('cb_modal_canvas_data', c.toDataURL('image/jpeg', 0.9));
+                localStorage.setItem('cb_modal_filename', file.name);
+            }
+            renderModalPreview();
+        }
+
+        function renderModalPreview() {
+            const tool = modalState.tool;
+            if (!tool || !modalState.srcCanvas) return;
+
+            const canvas = document.getElementById('modalPreviewCanvas');
+            const txtBox = document.getElementById('modalTextPreview');
+            const ctx = canvas.getContext('2d');
+
+            if (tool.mode === 'extract' && tool.format !== 'jpg') {
+                canvas.classList.add('hidden');
+                txtBox.classList.remove('hidden');
+                const words = modalState.extractedText.trim().split(/\s+/).filter(Boolean).length;
+                txtBox.textContent = `Words: ${words} | Characters: ${modalState.extractedText.length}\n\n${modalState.extractedText}`;
+                return;
+            }
+
+            canvas.classList.remove('hidden');
+            txtBox.classList.add('hidden');
+
+            if (tool.mode === 'text-to-pdf') {
+                canvas.width = 595;
+                canvas.height = 842;
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, 595, 842);
+                ctx.fillStyle = '#0f172a';
+                ctx.font = '13px Inter, sans-serif';
+                const lines = (document.getElementById('mTextToPdf')?.value || '').split('\n');
+                lines.forEach((l, i) => ctx.fillText(l, 50, 70 + i * 22));
+                return;
+            }
+
+            canvas.width = modalState.srcCanvas.width;
+            canvas.height = modalState.srcCanvas.height;
+
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((modalState.rot * Math.PI) / 180);
+            ctx.drawImage(modalState.srcCanvas, -canvas.width / 2, -canvas.height / 2);
+            ctx.restore();
+
+            if (tool.mode === 'crop') {
+                const top = (parseFloat(document.getElementById('mCropTop')?.value || 3) / 100) * canvas.height;
+                const left = (parseFloat(document.getElementById('mCropLeft')?.value || 4) / 100) * canvas.width;
+                const w = (parseFloat(document.getElementById('mCropW')?.value || 92) / 100) * canvas.width;
+                const h = (parseFloat(document.getElementById('mCropH')?.value || 48) / 100) * canvas.height;
+                ctx.strokeStyle = '#3b5998';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(left, top, w, h);
+            }
+
+            if (tool.mode === 'edit') {
+                const txt = document.getElementById('mEditTxt')?.value || 'Signed';
+                const y = (parseFloat(document.getElementById('mEditY')?.value || 55) / 100) * canvas.height;
+                if (tool.sub === 'redact') {
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(50, y - 20, 320, 30);
+                } else if (tool.sub === 'highlight') {
+                    ctx.fillStyle = 'rgba(250, 204, 21, 0.45)';
+                    ctx.fillRect(50, y - 20, 380, 28);
+                } else {
+                    ctx.fillStyle = '#1d4ed8';
+                    ctx.font = 'bold italic 19px Georgia, serif';
+                    ctx.fillText(txt, 60, y);
+                }
+            }
+
+            const kbInput = document.getElementById('modalTargetKb');
+            if (kbInput) {
+                document.getElementById('modalOutSize').textContent = `~${kbInput.value} KB`;
+            }
+        }
+
+        function runModalJsPDFExport() {
+            const tool = modalState.tool;
+            const { jsPDF } = window.jspdf;
+            const canvas = document.getElementById('modalPreviewCanvas');
+
+            if (tool.mode === 'extract' && tool.format !== 'jpg') {
+                const blob = new Blob([document.getElementById('modalTextPreview').textContent], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `CyberBabu_${tool.id}.${tool.format || 'txt'}`;
+                a.click();
+                showToast('Downloaded extracted file.');
+                return;
+            }
+
+            if (tool.format === 'jpg') {
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/jpeg', 0.95);
+                a.download = `CyberBabu_Page.jpg`;
+                a.click();
+                showToast('Downloaded JPG image.');
+                return;
+            }
+
+            // If shipping label / crop mode, export only the cropped area cleanly
+            if (tool.mode === 'crop') {
+                const top = (parseFloat(document.getElementById('mCropTop')?.value || 3) / 100) * modalState.srcCanvas.height;
+                const left = (parseFloat(document.getElementById('mCropLeft')?.value || 4) / 100) * modalState.srcCanvas.width;
+                const w = (parseFloat(document.getElementById('mCropW')?.value || 92) / 100) * modalState.srcCanvas.width;
+                const h = (parseFloat(document.getElementById('mCropH')?.value || 48) / 100) * modalState.srcCanvas.height;
+
+                const cropC = document.createElement('canvas');
+                cropC.width = Math.max(10, Math.round(w));
+                cropC.height = Math.max(10, Math.round(h));
+                cropC.getContext('2d').drawImage(modalState.srcCanvas, left, top, w, h, 0, 0, cropC.width, cropC.height);
+
+                const doc = new jsPDF({ unit: 'pt', format: [cropC.width * 0.75, cropC.height * 0.75] });
+                doc.addImage(cropC.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, cropC.width * 0.75, cropC.height * 0.75);
+                doc.save(`CyberBabu_${tool.id}.pdf`);
+                showToast('Downloaded cropped PDF.');
+                return;
+            }
+
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+            const qual = (parseFloat(document.getElementById('modalQual')?.value || 82)) / 100;
+            doc.addImage(canvas.toDataURL('image/jpeg', qual), 'JPEG', 0, 0, 595.28, 841.89);
+
+            if (tool.mode === 'increase') {
+                const targetKB = parseFloat(document.getElementById('modalTargetKb')?.value || 500);
+                const buf = doc.output('arraybuffer');
+                const padLen = Math.max(0, targetKB * 1024 - buf.byteLength);
+                const pad = new TextEncoder().encode(`\n%CyberBabu-Pad:${'0'.repeat(padLen)}\n`);
+                const out = new Uint8Array(buf.byteLength + pad.byteLength);
+                out.set(new Uint8Array(buf), 0);
+                out.set(pad, buf.byteLength);
+                const blob = new Blob([out], { type: 'application/pdf' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `CyberBabu_${tool.id}.pdf`;
+                a.click();
+                showToast(`Downloaded PDF (${targetKB} KB).`);
+                return;
+            }
+
+            doc.save(`CyberBabu_${tool.id}.pdf`);
+            showToast('Downloaded processed PDF.');
+        }
+
+        function instantPrintModalCanvas() {
+            const url = document.getElementById('modalPreviewCanvas').toDataURL('image/png');
+            const area = document.getElementById('instantPrintArea');
+            area.innerHTML = `<img src="${url}" />`;
+            area.classList.remove('hidden');
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => area.classList.add('hidden'), 400);
+            }, 120);
+        }
+
+        // Initialize & Restore Saved Workspace State on Load
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (localStorage.getItem('cb_theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+            lucide.createIcons();
+
+            // Copy header fallback SVG inner markup to hero fallback SVG so both match identically if offline
+            const fallbackSvgs = document.querySelectorAll('.cb-logo-fallback');
+            if (fallbackSvgs.length > 1) {
+                fallbackSvgs[1].innerHTML = fallbackSvgs[0].innerHTML;
+            }
+
+            // Restore exact pinned PNG logo if previously selected
+            const savedLogo = await dbLoadItem('cb_exact_logo_png');
+            if (savedLogo) {
+                applyBrandLogoDataUrl(savedLogo);
+            }
+
+            const savedQuery = localStorage.getItem('cb_search_query') || '';
+            if (savedQuery) document.getElementById('toolSearchInput').value = savedQuery;
+
+            renderCategoryPills();
+            filterTools();
+
+            // Restore Passport Photo Maker files/settings from IndexedDB + localStorage
+            await restorePassportStateFromStorage();
+
+            // Restore previously open modal file & tool if user refreshed mid-task
+            const savedModalDataUrl = await dbLoadItem('cb_modal_canvas_data');
+            if (savedModalDataUrl) {
+                const img = new Image();
+                img.onload = () => {
+                    const c = document.createElement('canvas');
+                    c.width = img.width;
+                    c.height = img.height;
+                    c.getContext('2d').drawImage(img, 0, 0);
+                    modalState.srcCanvas = c;
+                    document.getElementById('modalFileStatus').textContent = localStorage.getItem('cb_modal_filename') || 'Restored file';
+                    if (modalState.tool) renderModalPreview();
+                };
+                img.src = savedModalDataUrl;
+            }
+
+            const savedModalTool = localStorage.getItem('cb_open_modal_tool');
+            if (savedModalTool && TOOL_LOOKUP[savedModalTool]) {
+                openTool(savedModalTool, true);
+            }
+
+            // Restore active tab so refreshing never resets the user to the start
+            const savedTab = localStorage.getItem('cb_active_tab') || 'pdf-tools';
+            switchTab(savedTab, true);
+        });
+    </script>
+</body>
+</html>
